@@ -5,6 +5,14 @@ const Chatkit = require("@pusher/chatkit-server");
 
 require("dotenv").config();
 
+const AuthenticationClient = require('auth0').AuthenticationClient;
+
+const auth0 = new AuthenticationClient({
+  domain: process.env.AUTH0_DOMAIN,
+  clientId: process.env.AUTH0_CLIENT_ID,
+  clientSecret: process.env.AUTH0_CLIENT_SECRET
+});
+
 const app = express();
 const INSTANCE_LOCATOR_ID = process.env.CHATKIT_INSTANCE_LOCATOR_ID;
 const CHATKIT_SECRET = process.env.CHATKIT_SECRET_KEY;
@@ -18,10 +26,40 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
-let rooms = [];
+let rooms = [
+  {
+    id: '20018546',
+    name: 'ren-yoh'
+  }
+];
+let system_token = '';
 
 app.get("/", (req, res) => {
   res.send("all green!");
+});
+
+app.get("/token/refresh", (req, res) => {
+  auth0.clientCredentialsGrant(
+    {
+      audience: `https://${process.env.AUTH0_DOMAIN}/api/v2/`,
+      scope: 'read:users read:user_idp_tokens'
+    },
+    (err, response) => {
+      if (err) {
+        console.log('error occurred: ', err);
+      } else {
+        system_token = response.access_token;
+        console.log('access token: ', system_token);
+
+      }
+
+      res.send('ok');
+    }
+  );
+});
+
+app.get("/system-token", (req, res) => {
+  res.send(system_token); // note: for testing only. remove this
 });
 
 app.post("/users", async (req, res) => {
@@ -32,11 +70,11 @@ app.post("/users", async (req, res) => {
       name: username
     });
 
-    res.sendStatus(200);
+    res.send(system_token);
   } catch (err) {
     if (err.error === "services/chatkit/user_already_exists") {
 
-      res.sendStatus(201);
+      res.send(system_token);
     } else {
 
       let statusCode = err.error.status;
@@ -57,6 +95,7 @@ app.post("/rooms", async (req, res) => {
   });
 
   if (!room_data) {
+
     let room = await chatkit.createRoom({
       creatorId: user_id,
       name: room_name

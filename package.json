@@ -9,7 +9,6 @@
   "dependencies": {
     "@pusher/chatkit-client": "^1.4.1",
     "axios": "^0.18.0",
-    "base64-arraybuffer": "^0.1.5",
     "buffer": "^5.2.1",
     "dropbox": "^4.0.17",
     "react": "16.8.3",

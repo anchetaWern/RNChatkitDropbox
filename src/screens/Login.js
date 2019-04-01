@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import stringHash from "string-hash";
 import axios from "axios";
+import Permissions from "react-native-permissions";
 
 const CHAT_SERVER = "YOUR NGROK HTTPS URL/users";
 
@@ -11,10 +12,24 @@ class LoginScreen extends Component {
   };
 
   state = {
-    username: "",
-    friends_username: "",
+    username: "yoh",
+    friends_username: "ren",
     is_loading: false
   };
+
+  componentDidMount() {
+    Permissions.check('storage').then((response) => {
+      console.log('storage permission: ', response);
+
+      if(response == 'undetermined') {
+
+        Permissions.request('storage').then(response => {
+          console.log('requested storage permission: ', response);
+        });
+
+      }
+    });
+  }
 
   //
 
@@ -76,7 +91,7 @@ class LoginScreen extends Component {
     if (username && friends_username) {
 
       try {
-        await axios.post(
+        const response = await axios.post(
           CHAT_SERVER,
           {
             user_id: user_id,
@@ -84,10 +99,13 @@ class LoginScreen extends Component {
           }
         );
 
+        const system_token = response.data;
+
         this.props.navigation.navigate("Chat", {
           user_id,
           username,
-          friends_username
+          friends_username,
+          system_token
         });
 
       } catch (e) {
