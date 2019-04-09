@@ -1,5 +1,7 @@
 # RNChatkitDropbox
-A React Native chat app built with Chatkit with Dropbox file upload and download features
+A React Native chat app built with Chatkit with Dropbox file upload and download features.
+
+You can read the full tutorial at: [https://pusher.com/tutorials/dropbox-react-native-chat](https://pusher.com/tutorials/dropbox-react-native-chat)
 
 ### Prerequisites
 
